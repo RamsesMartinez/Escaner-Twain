@@ -2,18 +2,17 @@
 using System.Collections;
 using System.IO;
 using System.IO.Compression;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 using TwainLib;
+using System.Configuration;
+using Google.Cloud.Storage.V1;
+using Google.Apis.Auth.OAuth2;
+using GoogleCloudSamples.Services;
 
 namespace Escaner_Twain
 {
@@ -108,22 +107,72 @@ namespace Escaner_Twain
 
         }
 
+        private void UploadFile(string bucketName, string localPath, string objectName = null)
+        {
+            string jsonPath = ConfigurationManager.AppSettings["jsonPath"].ToString();
+            var credential = GoogleCredential.FromFile(jsonPath);
+
+            // Instantiates a client.
+            StorageClient storageClient = StorageClient.Create(credential);
+
+
+            using (var f = File.OpenRead(localPath))
+            {
+                objectName = objectName ?? Path.GetFileName(localPath);
+                storageClient.UploadObject(bucketName, objectName, null, f);
+                Console.WriteLine($"Uploaded {objectName}.");
+            }
+            GC.Collect();
+        }
+
         /// <summary>
         /// Almacena la imagen escaneada en el servidor, por medio de un Servicio Web
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnSaveImage_Click(object sender, EventArgs e)
+        private async void btnSaveImage_Click(object sender, EventArgs e)
         {
-            Bitmap bmp = new Bitmap(pictureBoxEscaner.Image);
+            try
+            {
+                string jsonPath = ConfigurationManager.AppSettings["jsonPath"].ToString();
+                string projectId = ConfigurationManager.AppSettings["projectId"].ToString();
+                string bucketName = ConfigurationManager.AppSettings["bucketName"].ToString();
+                string filesPath = ConfigurationManager.AppSettings["filesPath"].ToString();
+                string imgName = DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".jpeg";
 
-            string imgSerializada = this.SerializarImagen(bmp);
-            byte[] imgZip = this.Zip(imgSerializada);
+                string fullNameImg = filesPath + imgName;
 
-           
-            this.bImageReady = true;
-            this.sErrorMsg = String.Empty;
-            this.Close();
+                Image img = pictureBoxEscaner.Image;
+
+                img.Save(@fullNameImg, ImageFormat.Jpeg);
+
+                ImageUploader imgUploader = new ImageUploader(bucketName);
+
+                string url = string.Empty;
+                var task = imgUploader.UploadImageAsync(fullNameImg);
+                url = await task;
+
+                // this.UploadFile(bucketName, fullNameImg);
+
+                // Bitmap bmp = new Bitmap(pictureBoxEscaner.Image);
+
+                //string imgSerializada = this.SerializarImagen(bmp);
+                //byte[] imgZip = this.Zip(imgSerializada);
+
+
+                this.bImageReady = true;
+                this.sErrorMsg = String.Empty;
+                MessageBox.Show("Imagen almacenada: " + url, "Imagen guardada", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                // this.Close();
+            }
         }
 
         /// <summary>
