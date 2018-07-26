@@ -28,6 +28,7 @@
             this.buttonZoomMas = new System.Windows.Forms.Button();
             this.buttonZoomMenos = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
             this.Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEscaner)).BeginInit();
@@ -45,7 +46,7 @@
             resources.ApplyResources(this.btnSaveImage, "btnSaveImage");
             this.btnSaveImage.Name = "btnSaveImage";
             this.btnSaveImage.UseVisualStyleBackColor = true;
-            this.btnSaveImage.Click += new System.EventHandler(this.btnSaveImage_Click);
+            this.btnSaveImage.Click += new System.EventHandler(this.BtnSaveImage_Click);
             // 
             // menu
             // 
@@ -113,10 +114,18 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
+            // button1
+            // 
+            resources.ApplyResources(this.button1, "button1");
+            this.button1.Name = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // frmEscaner
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             resources.ApplyResources(this, "$this");
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonZoomMenos);
             this.Controls.Add(this.buttonZoomMas);
@@ -127,7 +136,6 @@
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.Name = "frmEscaner";
-            this.TopMost = true;
             this.Load += new System.EventHandler(this.frmEscaner_Load);
             this.menu.ResumeLayout(false);
             this.menu.PerformLayout();
@@ -152,5 +160,6 @@
         private System.Windows.Forms.Button buttonZoomMas;
         private System.Windows.Forms.Button buttonZoomMenos;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button1;
     }
 }

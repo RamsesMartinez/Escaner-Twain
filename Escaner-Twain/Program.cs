@@ -14,9 +14,11 @@ namespace Escaner_Twain
 
     class StorageQuickstart
     {
+        [STAThread]
 
-        public static void Main(string[] args)
-        {
+        static void Main(string[] args)
+        { 
+
             // Your Google Cloud Platform project ID.
             string projectId = "escaner-twain";
             // The name for the new bucket.

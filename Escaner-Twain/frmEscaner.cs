@@ -95,15 +95,55 @@ namespace Escaner_Twain
         /// <param name="e"></param>
         private void btnLoadImage_Click(object sender, EventArgs e)
         {
-           
-            if (!bMsgFilter)
-            {
-                this.Enabled = false;
-                bMsgFilter = true;
-                Application.AddMessageFilter(this);
-            }
 
-            tw.Acquire();
+            try
+            {
+
+                if (!bMsgFilter)
+                {
+                    this.Enabled = false;
+                    bMsgFilter = true;
+                    Application.AddMessageFilter(this);
+                }
+
+                tw.Acquire();
+            }
+            catch (Exception ex) { }
+        }
+
+        /// <summary>
+        /// Función para cargar un archcivo directamente a la nube
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string jsonPath = ConfigurationManager.AppSettings["jsonPath"].ToString();
+                string projectId = ConfigurationManager.AppSettings["projectId"].ToString();
+                string bucketName = ConfigurationManager.AppSettings["bucketName"].ToString();
+                string filesPath = ConfigurationManager.AppSettings["filesPath"].ToString();
+                
+
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Filter = "Archivos PDF|*.pdf";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+
+                    string fileName = ofd.FileName;
+                    /**
+                    Image img = Image.FromFile(fileName);
+                    this.activarElementosForm(img);
+                */
+                    this.UploadFile(bucketName, fileName);
+                    MessageBox.Show("Archivo almacenado", "Listo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+            }
 
         }
 
@@ -119,7 +159,7 @@ namespace Escaner_Twain
             using (var f = File.OpenRead(localPath))
             {
                 objectName = objectName ?? Path.GetFileName(localPath);
-                storageClient.UploadObject(bucketName, objectName, null, f);
+                storageClient.UploadObject(bucketName, objectName, "application/pdf", f);
                 Console.WriteLine($"Uploaded {objectName}.");
             }
             GC.Collect();
@@ -130,7 +170,7 @@ namespace Escaner_Twain
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void btnSaveImage_Click(object sender, EventArgs e)
+        private async void BtnSaveImage_Click(object sender, EventArgs e)
         {
             try
             {
@@ -541,7 +581,6 @@ namespace Escaner_Twain
             this.pictureBoxEscaner.Height += 150;
             this.pictureBoxEscaner.Width += 150;
         }
-
 
     }
 
